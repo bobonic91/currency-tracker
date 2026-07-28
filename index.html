@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGD Currency Tracker</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="app-header">
+    <h1>SGD Currency Tracker</h1>
+    <p class="subtitle">SGD vs JPY · CNY · MYR</p>
+  </header>
+
+  <div class="disclaimer" role="note">
+    <strong>Heads up:</strong> This shows the <strong>mid-market (reference) rate</strong>, not what YouTrip/Wise/banks will actually give you — they add a small markup on top. Use this to judge <em>timing</em> and <em>their markup</em>, not as the exact rate you'll receive.
+  </div>
+
+  <div id="global-error" class="banner banner-error hidden"></div>
+
+  <!-- Overview -->
+  <section class="card" id="overview-section">
+    <h2>Current Mid-Market Rates</h2>
+    <p class="meta" id="overview-updated">Loading…</p>
+    <p class="meta">ECB publishes reference rates once per weekday (~4pm CET) — outside those hours, or on weekends/holidays, this is the most recent published rate.</p>
+    <div class="rate-grid" id="overview-grid">
+      <div class="rate-card skeleton" data-currency="JPY">
+        <span class="flag">🇯🇵</span>
+        <span class="pair">SGD → JPY</span>
+        <span class="rate-value">—</span>
+      </div>
+      <div class="rate-card skeleton" data-currency="CNY">
+        <span class="flag">🇨🇳</span>
+        <span class="pair">SGD → CNY</span>
+        <span class="rate-value">—</span>
+      </div>
+      <div class="rate-card skeleton" data-currency="MYR">
+        <span class="flag">🇲🇾</span>
+        <span class="pair">SGD → MYR</span>
+        <span class="rate-value">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trends -->
+  <section class="card" id="trends-section">
+    <h2>Trend</h2>
+    <div class="range-selector" role="group" aria-label="Trend range">
+      <button type="button" class="range-btn" data-range="1M">1M</button>
+      <button type="button" class="range-btn active" data-range="6M">6M</button>
+      <button type="button" class="range-btn" data-range="1Y">1Y</button>
+    </div>
+    <div id="trends-container">
+      <p class="meta">Loading charts…</p>
+    </div>
+  </section>
+
+  <!-- Quick reference -->
+  <section class="card" id="quickref-section">
+    <h2>Quick Reference</h2>
+    <p class="meta">Common SGD amounts converted at the current mid-market rate.</p>
+    <div id="quickref-container">
+      <p class="meta">Loading…</p>
+    </div>
+  </section>
+
+  <footer class="app-footer">
+    <p>Rates from <a href="https://www.frankfurter.app/" target="_blank" rel="noopener">Frankfurter API</a> (ECB reference rates). Mid-market rate only — not a live tradable rate.</p>
+  </footer>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>
