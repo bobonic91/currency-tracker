@@ -301,6 +301,22 @@
     } catch (e) { /* ignore */ }
   }
 
+  const MAX_COMPARE = 3;
+
+  function loadCompare() {
+    try {
+      const stored = JSON.parse(localStorage.getItem('ct_compare_currencies'));
+      if (Array.isArray(stored)) return stored.filter((c) => ALL_CURRENCIES.includes(c)).slice(0, MAX_COMPARE);
+    } catch (e) { /* ignore */ }
+    return [];
+  }
+
+  function saveCompare(compare) {
+    try {
+      localStorage.setItem('ct_compare_currencies', JSON.stringify(compare));
+    } catch (e) { /* ignore */ }
+  }
+
   // ---------- Data fetchers (with caching) ----------
 
   async function getLatestRates() {
@@ -345,6 +361,7 @@
     rangeKey: loadRange(),
     favorites: loadFavorites(),
     chartCurrency: loadChartCurrency(),
+    compare: loadCompare(),
   };
 
   // ---------- Overview ----------
@@ -417,32 +434,44 @@
     document.getElementById('overview-updated').textContent = 'Could not reach the rate service.';
   }
 
-  function computeCardBadge(series) {
+  function computePercentileBadge(series) {
     if (series.length < 2) return null;
-    const values = series.map((p) => p.value);
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const current = values[values.length - 1];
-    const range = max - min;
-    if (range === 0) return null;
-    const pct = (current - min) / range;
-    if (pct >= 0.85) return { text: '▲ Near 6M high', cls: 'good' };
-    if (pct <= 0.15) return { text: '▼ Near 6M low', cls: 'bad' };
-    return null;
+    const current = series[series.length - 1].value;
+    const pct = Math.round(percentileRank(series, current));
+    if (pct >= 90) return { text: `${ordinal(pct)} pct · 6M high`, cls: 'good' };
+    if (pct <= 10) return { text: `${ordinal(pct)} pct · 6M low`, cls: 'bad' };
+    return { text: `${ordinal(pct)} percentile (6M)`, cls: 'neutral' };
+  }
+
+  function computeMomentumBadge(series) {
+    const momentum = computeMomentum(series);
+    if (!momentum) return null;
+    const cls = momentum.pctChange > 0.05 ? 'good' : momentum.pctChange < -0.05 ? 'bad' : 'neutral';
+    const arrow = momentum.pctChange >= 0 ? '▲' : '▼';
+    const sign = momentum.pctChange >= 0 ? '+' : '';
+    return { text: `${arrow} ${sign}${momentum.pctChange.toFixed(1)}% (${momentum.days}d)`, cls };
   }
 
   function renderOverviewBadges(historyFor6M) {
     state.favorites.forEach((cur) => {
       const card = document.querySelector(`.rate-card[data-currency="${cur}"]`);
       if (!card) return;
-      const existing = card.querySelector('.rate-badge');
-      if (existing) existing.remove();
-      const badge = computeCardBadge(buildSeries(historyFor6M, cur));
-      if (!badge) return;
-      const el = document.createElement('span');
-      el.className = `rate-badge ${badge.cls}`;
-      el.textContent = badge.text;
-      card.appendChild(el);
+      const existingRow = card.querySelector('.badge-row');
+      if (existingRow) existingRow.remove();
+
+      const series = buildSeries(historyFor6M, cur);
+      const badges = [computePercentileBadge(series), computeMomentumBadge(series)].filter(Boolean);
+      if (badges.length === 0) return;
+
+      const row = document.createElement('div');
+      row.className = 'badge-row';
+      badges.forEach((badge) => {
+        const el = document.createElement('span');
+        el.className = `rate-badge ${badge.cls}`;
+        el.textContent = badge.text;
+        row.appendChild(el);
+      });
+      card.appendChild(row);
     });
   }
 
@@ -482,6 +511,42 @@
 
   function axisDecimals(value) {
     return value >= 10 ? 2 : 3;
+  }
+
+  // Percentile rank: what fraction of days in the series had a value at or
+  // below `current`. More robust than a min-max position since it isn't
+  // skewed by a single outlier day at either extreme.
+  function percentileRank(series, current) {
+    const values = series.map((p) => p.value);
+    const countAtOrBelow = values.filter((v) => v <= current).length;
+    return (countAtOrBelow / values.length) * 100;
+  }
+
+  function ordinal(n) {
+    const suffixes = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return n + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
+  }
+
+  // Change over the last ~7 calendar days, using the closest available
+  // (weekday) data point at or before that date.
+  function computeMomentum(series) {
+    if (series.length < 2) return null;
+    const current = series[series.length - 1];
+    const targetDate = new Date(current.date + 'T00:00:00');
+    targetDate.setDate(targetDate.getDate() - 7);
+    const targetISO = targetDate.toISOString().slice(0, 10);
+
+    let past = null;
+    for (let i = series.length - 1; i >= 0; i--) {
+      if (series[i].date <= targetISO) { past = series[i]; break; }
+    }
+    if (!past) past = series[0];
+    if (past.date === current.date) return null;
+
+    const days = Math.round((new Date(current.date) - new Date(past.date)) / 86400000);
+    const pctChange = ((current.value - past.value) / past.value) * 100;
+    return { pctChange, days };
   }
 
   function renderChartSvg(series) {
@@ -543,27 +608,20 @@
     const min = Math.min(...values);
     const max = Math.max(...values);
     const current = values[values.length - 1];
-    const range = max - min;
 
-    if (range === 0) {
+    if (max === min) {
       return { text: `Rate has been flat over the last ${rangeLabel}.`, cls: 'neutral' };
     }
 
-    const pct = (current - min) / range;
+    const pct = Math.round(percentileRank(series, current));
 
-    if (pct >= 0.9) {
-      return { text: `🔼 Near a ${rangeLabel} high — a favorable time to convert SGD.`, cls: 'good' };
+    if (pct >= 90) {
+      return { text: `🔼 ${ordinal(pct)} percentile — near a ${rangeLabel} high, a favorable time to convert SGD.`, cls: 'good' };
     }
-    if (pct <= 0.1) {
-      return { text: `🔽 Near a ${rangeLabel} low — an unfavorable time to convert SGD.`, cls: 'bad' };
+    if (pct <= 10) {
+      return { text: `🔽 ${ordinal(pct)} percentile — near a ${rangeLabel} low, an unfavorable time to convert SGD.`, cls: 'bad' };
     }
-    if (pct >= 0.55) {
-      return { text: `Above the midpoint of its ${rangeLabel} range (~${Math.round(pct * 100)}% toward the high).`, cls: 'neutral' };
-    }
-    if (pct <= 0.45) {
-      return { text: `Below the midpoint of its ${rangeLabel} range (~${Math.round(pct * 100)}% toward the high).`, cls: 'neutral' };
-    }
-    return { text: `Roughly in the middle of its ${rangeLabel} range.`, cls: 'neutral' };
+    return { text: `${ordinal(pct)} percentile of its ${rangeLabel} range — higher than ${pct}% of days in this period.`, cls: 'neutral' };
   }
 
   function renderTrend(history, rangeKey, cur) {
@@ -612,6 +670,117 @@
     });
   }
 
+  // ---------- Compare (overlay) chart ----------
+
+  function buildNormalizedSeries(history, cur) {
+    const series = buildSeries(history, cur);
+    if (series.length === 0) return [];
+    const base = series[0].value;
+    return series.map((p) => ({ date: p.date, value: (p.value / base) * 100 }));
+  }
+
+  function renderCompareChart(history, currencies) {
+    const seriesList = currencies
+      .map((cur) => ({ cur, series: buildNormalizedSeries(history, cur) }))
+      .filter((s) => s.series.length > 0);
+
+    if (seriesList.length === 0) {
+      return '<p class="meta">No data available for the selected currencies.</p>';
+    }
+
+    const width = 340;
+    const height = 170;
+    const padLeft = 42;
+    const padRight = 10;
+    const padTop = 14;
+    const padBottom = 22;
+    const plotW = width - padLeft - padRight;
+    const plotH = height - padTop - padBottom;
+
+    const allValues = seriesList.flatMap((s) => s.series.map((p) => p.value)).concat([100]);
+    const min = Math.min(...allValues);
+    const max = Math.max(...allValues);
+    const range = (max - min) || 1;
+
+    const n = seriesList[0].series.length;
+    const stepX = n > 1 ? plotW / (n - 1) : 0;
+    const xAt = (i) => padLeft + i * stepX;
+    const yAt = (v) => padTop + plotH * (1 - (v - min) / range);
+    const baselineY = yAt(100);
+
+    const firstDate = formatShortDate(seriesList[0].series[0].date);
+    const lastDate = formatShortDate(seriesList[0].series[n - 1].date);
+
+    let linesSvg = '';
+    let legendHtml = '';
+    seriesList.forEach((s, idx) => {
+      const pts = s.series.map((p, i) => `${xAt(i).toFixed(2)},${yAt(p.value).toFixed(2)}`).join(' ');
+      linesSvg += `<polyline points="${pts}" fill="none" class="compare-line compare-line-${idx}" stroke-width="2" vector-effect="non-scaling-stroke" />`;
+      const change = s.series[s.series.length - 1].value - 100;
+      const meta = CURRENCY_META[s.cur];
+      legendHtml += `
+        <div class="compare-legend-item">
+          <span class="compare-dot compare-dot-${idx}"></span>
+          ${meta.flag}<span>${s.cur}</span>
+          <span class="compare-legend-change ${change >= 0 ? 'good' : 'bad'}">${change >= 0 ? '+' : ''}${change.toFixed(1)}%</span>
+        </div>
+      `;
+    });
+
+    const svg = `
+      <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" class="chart-svg">
+        <line x1="${padLeft}" y1="${baselineY.toFixed(2)}" x2="${width - padRight}" y2="${baselineY.toFixed(2)}" class="chart-grid" />
+        <text x="${padLeft - 6}" y="${baselineY.toFixed(2)}" text-anchor="end" dominant-baseline="middle" class="chart-label">100</text>
+        <line x1="${padLeft}" y1="${padTop}" x2="${padLeft}" y2="${height - padBottom}" class="chart-axis" />
+        <line x1="${padLeft}" y1="${height - padBottom}" x2="${width - padRight}" y2="${height - padBottom}" class="chart-axis" />
+        <text x="${padLeft}" y="${height - 6}" text-anchor="start" class="chart-label">${firstDate}</text>
+        <text x="${width - padRight}" y="${height - 6}" text-anchor="end" class="chart-label">${lastDate}</text>
+        ${linesSvg}
+      </svg>
+    `;
+
+    return `<div class="trend-chart-wrap">${svg}</div><div class="compare-legend">${legendHtml}</div>`;
+  }
+
+  function renderCompareSection() {
+    const container = document.getElementById('compare-container');
+    if (!state.history) {
+      container.innerHTML = '<p class="meta">Loading…</p>';
+      return;
+    }
+    if (state.compare.length < 2) {
+      container.innerHTML = '<p class="meta">Select 2–3 currencies above to compare their relative movement.</p>';
+      return;
+    }
+    container.innerHTML = renderCompareChart(state.history, state.compare);
+  }
+
+  function renderCompareChips() {
+    const container = document.getElementById('compare-chips');
+    container.innerHTML = ALL_CURRENCIES.map((cur) => `
+      <button type="button" class="chip ${state.compare.includes(cur) ? 'active' : ''}" data-currency="${cur}">
+        ${CURRENCY_META[cur].flag}<span>${cur}</span>
+      </button>
+    `).join('');
+
+    container.querySelectorAll('.chip').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cur = btn.dataset.currency;
+        if (state.compare.includes(cur)) {
+          state.compare = state.compare.filter((c) => c !== cur);
+        } else {
+          if (state.compare.length >= MAX_COMPARE) return;
+          state.compare = [...state.compare, cur];
+        }
+        saveCompare(state.compare);
+        renderCompareChips();
+        renderCompareSection();
+      });
+    });
+
+    document.getElementById('compare-cap-note').classList.toggle('hidden', state.compare.length < MAX_COMPARE);
+  }
+
   async function loadAndRenderHistory(rangeKey) {
     state.rangeKey = rangeKey;
     document.querySelectorAll('.range-btn').forEach((btn) => {
@@ -624,6 +793,7 @@
       const history = await getHistory(rangeKey);
       state.history = history;
       renderTrend(history, rangeKey, state.chartCurrency);
+      renderCompareSection();
       loadOverviewBadges();
     } catch (e) {
       renderTrendsError();
@@ -642,6 +812,7 @@
     initRangeSelector();
     renderOverviewChips();
     renderChartCurrencySelect();
+    renderCompareChips();
 
     document.querySelectorAll('.range-btn').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.range === state.rangeKey);
