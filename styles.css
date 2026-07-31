@@ -117,6 +117,35 @@ body {
 }
 
 /* Overview */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--neutral-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px 4px 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, transform 100ms ease;
+}
+.chip:active { transform: scale(0.96); }
+.chip .flag-icon { width: 18px; vertical-align: -4px; }
+.chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
 .rate-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -141,7 +170,6 @@ body {
 .rate-card .pair { font-size: 0.78rem; color: var(--text-muted); }
 .rate-card .rate-value { font-size: 1.25rem; font-weight: 700; }
 .rate-card.error .rate-value { color: var(--bad); font-size: 0.85rem; font-weight: 500; }
-.rate-card.skeleton .rate-value { color: var(--text-muted); }
 
 .rate-badge {
   align-self: flex-start;
@@ -163,6 +191,18 @@ body {
 }
 
 /* Trends */
+#chart-currency-select {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  background: var(--neutral-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
 .range-selector {
   display: inline-flex;
   border: 1px solid var(--border);
@@ -201,12 +241,6 @@ body {
 }
 .fade-in { animation: fadeIn 250ms ease; }
 
-.trend-title {
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin-bottom: 2px;
-}
-
 .trend-chart-wrap {
   width: 100%;
 }
@@ -243,17 +277,6 @@ body {
 }
 
 /* Quick reference */
-.quickref-currency {
-  margin-bottom: 14px;
-}
-.quickref-currency:last-child { margin-bottom: 0; }
-
-.quickref-currency h3 {
-  font-size: 0.88rem;
-  margin: 0 0 6px;
-  color: var(--text-muted);
-}
-
 .quickref-row {
   display: flex;
   justify-content: space-between;

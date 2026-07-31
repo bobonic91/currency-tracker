@@ -2,9 +2,10 @@
   'use strict';
 
   const BASE = 'SGD';
-  const CURRENCIES = ['JPY', 'CNY', 'MYR'];
+
   // Windows doesn't render regional-indicator flag emoji (falls back to plain
   // letters), so flags are drawn as inline SVGs for consistent rendering everywhere.
+  // They're deliberately simplified (not heraldically exact) since they render at ~26px.
   const FLAG_JP = `<svg class="flag-icon" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <rect width="30" height="20" fill="#fff" stroke="#e2e8f0" stroke-width="0.5"/>
     <circle cx="15" cy="10" r="6" fill="#bc002d"/>
@@ -38,11 +39,136 @@
     <polygon points="11,5.7 11.6,7.1 13.1,7.2 11.9,8.1 12.3,9.5 11,8.7 9.7,9.5 10.1,8.1 8.9,7.2 10.4,7.1" fill="#ffcc00"/>
   </svg>`;
 
+  const FLAG_TH = `<svg class="flag-icon" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#fff"/>
+    <rect y="0" width="30" height="3.33" fill="#a51931"/>
+    <rect y="3.33" width="30" height="3.33" fill="#fff"/>
+    <rect y="6.67" width="30" height="6.67" fill="#2d2a4a"/>
+    <rect y="13.33" width="30" height="3.33" fill="#fff"/>
+    <rect y="16.67" width="30" height="3.33" fill="#a51931"/>
+  </svg>`;
+
+  const FLAG_KR = `<svg class="flag-icon" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#fff" stroke="#e2e8f0" stroke-width="0.5"/>
+    <path d="M15,5 A5,5 0 0,1 15,15 A2.5,2.5 0 0,1 15,10 A2.5,2.5 0 0,0 15,5 Z" fill="#c60c30"/>
+    <path d="M15,15 A5,5 0 0,1 15,5 A2.5,2.5 0 0,1 15,10 A2.5,2.5 0 0,0 15,15 Z" fill="#003478"/>
+    <g fill="#000">
+      <rect x="3" y="2.5" width="4" height="0.7"/>
+      <rect x="3" y="3.8" width="4" height="0.7"/>
+      <rect x="3" y="5.1" width="4" height="0.7"/>
+      <rect x="23" y="14.2" width="4" height="0.7"/>
+      <rect x="23" y="15.5" width="4" height="0.7"/>
+      <rect x="23" y="16.8" width="4" height="0.7"/>
+      <rect x="23" y="2.5" width="1.7" height="0.7"/>
+      <rect x="25.3" y="2.5" width="1.7" height="0.7"/>
+      <rect x="23" y="3.8" width="4" height="0.7"/>
+      <rect x="23" y="5.1" width="1.7" height="0.7"/>
+      <rect x="25.3" y="5.1" width="1.7" height="0.7"/>
+      <rect x="3" y="14.2" width="1.7" height="0.7"/>
+      <rect x="5.3" y="14.2" width="1.7" height="0.7"/>
+      <rect x="3" y="15.5" width="1.7" height="0.7"/>
+      <rect x="5.3" y="15.5" width="1.7" height="0.7"/>
+      <rect x="3" y="16.8" width="1.7" height="0.7"/>
+      <rect x="5.3" y="16.8" width="1.7" height="0.7"/>
+    </g>
+  </svg>`;
+
+  const FLAG_US = `<svg class="flag-icon" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#fff"/>
+    <g fill="#b22234">
+      <rect y="0" width="30" height="1.54"/>
+      <rect y="3.08" width="30" height="1.54"/>
+      <rect y="6.15" width="30" height="1.54"/>
+      <rect y="9.23" width="30" height="1.54"/>
+      <rect y="12.31" width="30" height="1.54"/>
+      <rect y="15.38" width="30" height="1.54"/>
+      <rect y="18.46" width="30" height="1.54"/>
+    </g>
+    <rect width="13" height="10.77" fill="#3c3b6e"/>
+    <g fill="#fff">
+      <circle cx="2.5" cy="2" r="0.5"/><circle cx="5.5" cy="2" r="0.5"/><circle cx="8.5" cy="2" r="0.5"/><circle cx="11.5" cy="2" r="0.5"/>
+      <circle cx="4" cy="4" r="0.5"/><circle cx="7" cy="4" r="0.5"/><circle cx="10" cy="4" r="0.5"/>
+      <circle cx="2.5" cy="6" r="0.5"/><circle cx="5.5" cy="6" r="0.5"/><circle cx="8.5" cy="6" r="0.5"/><circle cx="11.5" cy="6" r="0.5"/>
+      <circle cx="4" cy="8" r="0.5"/><circle cx="7" cy="8" r="0.5"/><circle cx="10" cy="8" r="0.5"/>
+    </g>
+  </svg>`;
+
+  const FLAG_EU = `<svg class="flag-icon" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#003399"/>
+    <g fill="#ffcc00">
+      <circle cx="15" cy="3.5" r="0.9"/><circle cx="18.25" cy="4.37" r="0.9"/><circle cx="20.63" cy="6.75" r="0.9"/>
+      <circle cx="21.5" cy="10" r="0.9"/><circle cx="20.63" cy="13.25" r="0.9"/><circle cx="18.25" cy="15.63" r="0.9"/>
+      <circle cx="15" cy="16.5" r="0.9"/><circle cx="11.75" cy="15.63" r="0.9"/><circle cx="9.37" cy="13.25" r="0.9"/>
+      <circle cx="8.5" cy="10" r="0.9"/><circle cx="9.37" cy="6.75" r="0.9"/><circle cx="11.75" cy="4.37" r="0.9"/>
+    </g>
+  </svg>`;
+
+  const FLAG_GB = `<svg class="flag-icon" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#00247d"/>
+    <line x1="0" y1="0" x2="30" y2="20" stroke="#fff" stroke-width="4"/>
+    <line x1="30" y1="0" x2="0" y2="20" stroke="#fff" stroke-width="4"/>
+    <line x1="0" y1="0" x2="30" y2="20" stroke="#cf142b" stroke-width="1.6"/>
+    <line x1="30" y1="0" x2="0" y2="20" stroke="#cf142b" stroke-width="1.6"/>
+    <line x1="15" y1="0" x2="15" y2="20" stroke="#fff" stroke-width="6"/>
+    <line x1="0" y1="10" x2="30" y2="10" stroke="#fff" stroke-width="6"/>
+    <line x1="15" y1="0" x2="15" y2="20" stroke="#cf142b" stroke-width="2.4"/>
+    <line x1="0" y1="10" x2="30" y2="10" stroke="#cf142b" stroke-width="2.4"/>
+  </svg>`;
+
+  const FLAG_AU = `<svg class="flag-icon" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#00247d"/>
+    <line x1="0" y1="0" x2="13" y2="10" stroke="#fff" stroke-width="2"/>
+    <line x1="13" y1="0" x2="0" y2="10" stroke="#fff" stroke-width="2"/>
+    <line x1="6.5" y1="0" x2="6.5" y2="10" stroke="#fff" stroke-width="2.6"/>
+    <line x1="0" y1="5" x2="13" y2="5" stroke="#fff" stroke-width="2.6"/>
+    <line x1="6.5" y1="0" x2="6.5" y2="10" stroke="#cf142b" stroke-width="1"/>
+    <line x1="0" y1="5" x2="13" y2="5" stroke="#cf142b" stroke-width="1"/>
+    <g fill="#fff">
+      <circle cx="21" cy="4" r="0.8"/><circle cx="24" cy="8" r="0.8"/><circle cx="20" cy="11" r="0.8"/>
+      <circle cx="24.5" cy="13.5" r="0.8"/><circle cx="19" cy="15" r="0.6"/><circle cx="9" cy="16" r="0.9"/>
+    </g>
+  </svg>`;
+
+  const FLAG_HK = `<svg class="flag-icon" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#de2910"/>
+    <g fill="#fff">
+      <ellipse cx="15" cy="6.5" rx="2" ry="3.5" transform="rotate(0,15,10)"/>
+      <ellipse cx="15" cy="6.5" rx="2" ry="3.5" transform="rotate(72,15,10)"/>
+      <ellipse cx="15" cy="6.5" rx="2" ry="3.5" transform="rotate(144,15,10)"/>
+      <ellipse cx="15" cy="6.5" rx="2" ry="3.5" transform="rotate(216,15,10)"/>
+      <ellipse cx="15" cy="6.5" rx="2" ry="3.5" transform="rotate(288,15,10)"/>
+    </g>
+  </svg>`;
+
+  const FLAG_TW = `<svg class="flag-icon" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="30" height="20" fill="#fe0000"/>
+    <rect width="15" height="10" fill="#000095"/>
+    <circle cx="7.5" cy="5" r="2.6" fill="#fff"/>
+    <g stroke="#fff" stroke-width="0.5">
+      <line x1="7.5" y1="0.5" x2="7.5" y2="2.2"/><line x1="7.5" y1="7.8" x2="7.5" y2="9.5"/>
+      <line x1="3" y1="5" x2="4.7" y2="5"/><line x1="10.3" y1="5" x2="12" y2="5"/>
+      <line x1="4.5" y1="2" x2="5.7" y2="3.2"/><line x1="9.3" y1="6.8" x2="10.5" y2="8"/>
+      <line x1="10.5" y1="2" x2="9.3" y2="3.2"/><line x1="5.7" y1="6.8" x2="4.5" y2="8"/>
+    </g>
+  </svg>`;
+
   const CURRENCY_META = {
-    JPY: { flag: FLAG_JP, name: 'Japanese Yen' },
-    CNY: { flag: FLAG_CN, name: 'Chinese Yuan' },
-    MYR: { flag: FLAG_MY, name: 'Malaysian Ringgit' },
+    JPY: { flag: FLAG_JP, name: 'Japanese Yen', decimals: 0 },
+    CNY: { flag: FLAG_CN, name: 'Chinese Yuan', decimals: 2 },
+    MYR: { flag: FLAG_MY, name: 'Malaysian Ringgit', decimals: 2 },
+    THB: { flag: FLAG_TH, name: 'Thai Baht', decimals: 2 },
+    KRW: { flag: FLAG_KR, name: 'South Korean Won', decimals: 0 },
+    USD: { flag: FLAG_US, name: 'US Dollar', decimals: 2 },
+    EUR: { flag: FLAG_EU, name: 'Euro', decimals: 2 },
+    GBP: { flag: FLAG_GB, name: 'British Pound', decimals: 2 },
+    AUD: { flag: FLAG_AU, name: 'Australian Dollar', decimals: 2 },
+    HKD: { flag: FLAG_HK, name: 'Hong Kong Dollar', decimals: 2 },
+    TWD: { flag: FLAG_TW, name: 'Taiwan Dollar', decimals: 2 },
   };
+
+  const ALL_CURRENCIES = Object.keys(CURRENCY_META);
+  const DEFAULT_FAVORITES = ['JPY', 'CNY', 'MYR'];
+  const DEFAULT_CHART_CURRENCY = 'JPY';
   const QUICK_SGD_AMOUNTS = [1, 10, 100];
 
   const RANGE_OPTIONS = {
@@ -128,13 +254,60 @@
     return d.toLocaleDateString(undefined, opts);
   }
 
+  // ---------- Persisted selection state ----------
+
+  function loadFavorites() {
+    try {
+      const stored = JSON.parse(localStorage.getItem('ct_overview_favorites'));
+      if (Array.isArray(stored)) {
+        const valid = stored.filter((c) => ALL_CURRENCIES.includes(c));
+        if (valid.length) return valid;
+      }
+    } catch (e) { /* ignore */ }
+    return [...DEFAULT_FAVORITES];
+  }
+
+  function saveFavorites(favorites) {
+    try {
+      localStorage.setItem('ct_overview_favorites', JSON.stringify(favorites));
+    } catch (e) { /* ignore */ }
+  }
+
+  function loadChartCurrency() {
+    try {
+      const stored = localStorage.getItem('ct_chart_currency');
+      if (stored && ALL_CURRENCIES.includes(stored)) return stored;
+    } catch (e) { /* ignore */ }
+    return DEFAULT_CHART_CURRENCY;
+  }
+
+  function saveChartCurrency(cur) {
+    try {
+      localStorage.setItem('ct_chart_currency', cur);
+    } catch (e) { /* ignore */ }
+  }
+
+  function loadRange() {
+    try {
+      const stored = localStorage.getItem('ct_trend_range');
+      if (stored && RANGE_OPTIONS[stored]) return stored;
+    } catch (e) { /* ignore */ }
+    return DEFAULT_RANGE;
+  }
+
+  function saveRange(rangeKey) {
+    try {
+      localStorage.setItem('ct_trend_range', rangeKey);
+    } catch (e) { /* ignore */ }
+  }
+
   // ---------- Data fetchers (with caching) ----------
 
   async function getLatestRates() {
     const key = 'ct_cache_latest';
     const cached = cacheGetFresh(key, LATEST_TTL_MS);
     if (cached) return cached;
-    const url = `${API_ROOT}/latest?from=${BASE}&to=${CURRENCIES.join(',')}`;
+    const url = `${API_ROOT}/latest?from=${BASE}&to=${ALL_CURRENCIES.join(',')}`;
     const data = await fetchJson(url);
     cacheSetTimestamped(key, data);
     return data;
@@ -146,7 +319,7 @@
     if (cached) return cached;
     const start = monthsAgoISO(RANGE_OPTIONS[rangeKey].months);
     const end = todayISO();
-    const url = `${API_ROOT}/${start}..${end}?from=${BASE}&to=${CURRENCIES.join(',')}`;
+    const url = `${API_ROOT}/${start}..${end}?from=${BASE}&to=${ALL_CURRENCIES.join(',')}`;
     const data = await fetchJson(url);
     cacheSetTimestamped(key, data);
     return data;
@@ -164,24 +337,61 @@
     document.getElementById('global-error').classList.add('hidden');
   }
 
+  // ---------- App state ----------
+
+  let state = {
+    latest: null,
+    history: null,
+    rangeKey: loadRange(),
+    favorites: loadFavorites(),
+    chartCurrency: loadChartCurrency(),
+  };
+
   // ---------- Overview ----------
 
-  function renderOverview(latest, fromCacheTs) {
-    const grid = document.getElementById('overview-grid');
-    grid.innerHTML = '';
-    CURRENCIES.forEach((cur) => {
-      const rate = latest.rates ? latest.rates[cur] : undefined;
-      const div = document.createElement('div');
-      div.className = 'rate-card';
-      div.dataset.currency = cur;
-      const meta = CURRENCY_META[cur];
-      div.innerHTML = `
-        <span class="flag">${meta.flag}</span>
-        <span class="pair">SGD → ${cur}</span>
-        <span class="rate-value">${rate ? '1 SGD = ' + rate.toFixed(4) + ' ' + cur : 'N/A'}</span>
-      `;
-      grid.appendChild(div);
+  function renderOverviewChips() {
+    const container = document.getElementById('overview-chips');
+    container.innerHTML = ALL_CURRENCIES.map((cur) => `
+      <button type="button" class="chip ${state.favorites.includes(cur) ? 'active' : ''}" data-currency="${cur}">
+        ${CURRENCY_META[cur].flag}<span>${cur}</span>
+      </button>
+    `).join('');
+
+    container.querySelectorAll('.chip').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cur = btn.dataset.currency;
+        if (state.favorites.includes(cur)) {
+          state.favorites = state.favorites.filter((c) => c !== cur);
+        } else {
+          state.favorites = [...state.favorites, cur];
+        }
+        saveFavorites(state.favorites);
+        renderOverviewChips();
+        if (state.latest) renderOverview(state.latest, null);
+        if (state.history) renderOverviewBadges(state.history);
+      });
     });
+  }
+
+  function renderOverview(latest, fromCacheTs) {
+    state.latest = latest;
+    const grid = document.getElementById('overview-grid');
+
+    if (state.favorites.length === 0) {
+      grid.innerHTML = '<p class="meta">No currencies selected — tap a currency above to add it.</p>';
+    } else {
+      grid.innerHTML = state.favorites.map((cur) => {
+        const rate = latest.rates ? latest.rates[cur] : undefined;
+        const meta = CURRENCY_META[cur];
+        return `
+          <div class="rate-card" data-currency="${cur}">
+            <span class="flag">${meta.flag}</span>
+            <span class="pair">SGD → ${cur}</span>
+            <span class="rate-value">${rate ? '1 SGD = ' + rate.toFixed(4) + ' ' + cur : 'N/A'}</span>
+          </div>
+        `;
+      }).join('');
+    }
 
     const updatedEl = document.getElementById('overview-updated');
     const asOf = latest.date ? formatDate(latest.date) : 'unknown date';
@@ -190,6 +400,21 @@
     } else {
       updatedEl.textContent = `Rate published ${asOf} · just fetched`;
     }
+  }
+
+  function renderOverviewError() {
+    const grid = document.getElementById('overview-grid');
+    grid.innerHTML = state.favorites.map((cur) => {
+      const meta = CURRENCY_META[cur];
+      return `
+        <div class="rate-card error">
+          <span class="flag">${meta.flag}</span>
+          <span class="pair">SGD → ${cur}</span>
+          <span class="rate-value">Unavailable</span>
+        </div>
+      `;
+    }).join('');
+    document.getElementById('overview-updated').textContent = 'Could not reach the rate service.';
   }
 
   function computeCardBadge(series) {
@@ -206,69 +431,46 @@
     return null;
   }
 
-  async function loadOverviewBadges() {
-    try {
-      const history = await getHistory('6M');
-      CURRENCIES.forEach((cur) => {
-        const card = document.querySelector(`.rate-card[data-currency="${cur}"]`);
-        if (!card) return;
-        const badge = computeCardBadge(buildSeries(history, cur));
-        if (!badge) return;
-        const el = document.createElement('span');
-        el.className = `rate-badge ${badge.cls}`;
-        el.textContent = badge.text;
-        card.appendChild(el);
-      });
-    } catch (e) { /* badges are a nice-to-have; skip silently on failure */ }
+  function renderOverviewBadges(historyFor6M) {
+    state.favorites.forEach((cur) => {
+      const card = document.querySelector(`.rate-card[data-currency="${cur}"]`);
+      if (!card) return;
+      const existing = card.querySelector('.rate-badge');
+      if (existing) existing.remove();
+      const badge = computeCardBadge(buildSeries(historyFor6M, cur));
+      if (!badge) return;
+      const el = document.createElement('span');
+      el.className = `rate-badge ${badge.cls}`;
+      el.textContent = badge.text;
+      card.appendChild(el);
+    });
   }
 
-  function renderOverviewError() {
-    const grid = document.getElementById('overview-grid');
-    grid.innerHTML = '';
-    CURRENCIES.forEach((cur) => {
-      const meta = CURRENCY_META[cur];
-      const div = document.createElement('div');
-      div.className = 'rate-card error';
-      div.innerHTML = `
-        <span class="flag">${meta.flag}</span>
-        <span class="pair">SGD → ${cur}</span>
-        <span class="rate-value">Unavailable</span>
-      `;
-      grid.appendChild(div);
-    });
-    document.getElementById('overview-updated').textContent = 'Could not reach the rate service.';
+  async function loadOverviewBadges() {
+    try {
+      const history6m = state.rangeKey === '6M' ? state.history : await getHistory('6M');
+      renderOverviewBadges(history6m);
+    } catch (e) { /* badges are a nice-to-have; skip silently on failure */ }
   }
 
   // ---------- Quick reference ----------
 
-  function renderQuickRef(latest) {
+  function renderQuickRef(latest, cur) {
     const container = document.getElementById('quickref-container');
-    container.innerHTML = '';
-    if (!latest || !latest.rates) {
+    const rate = latest && latest.rates ? latest.rates[cur] : undefined;
+    if (!rate) {
       container.innerHTML = '<p class="meta">Quick reference unavailable — no rate data.</p>';
       return;
     }
-    CURRENCIES.forEach((cur) => {
-      const rate = latest.rates[cur];
-      const meta = CURRENCY_META[cur];
-      const block = document.createElement('div');
-      block.className = 'quickref-currency';
-      let rowsHtml = '';
-      if (rate) {
-        const decimals = cur === 'JPY' ? 0 : 2;
-        QUICK_SGD_AMOUNTS.forEach((amt) => {
-          const foreign = amt * rate;
-          rowsHtml += `<div class="quickref-row"><span>SGD ${amt}</span><span>≈ ${foreign.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} ${cur}</span></div>`;
-        });
-      } else {
-        rowsHtml = '<div class="quickref-row"><span>Rate unavailable</span></div>';
-      }
-      block.innerHTML = `<h3>${meta.flag} ${cur}</h3>${rowsHtml}`;
-      container.appendChild(block);
-    });
+    const decimals = CURRENCY_META[cur].decimals;
+    const rows = QUICK_SGD_AMOUNTS.map((amt) => {
+      const foreign = amt * rate;
+      return `<div class="quickref-row"><span>SGD ${amt}</span><span>≈ ${foreign.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })} ${cur}</span></div>`;
+    }).join('');
+    container.innerHTML = rows;
   }
 
-  // ---------- Trend charts ----------
+  // ---------- Trend chart ----------
 
   function buildSeries(history, cur) {
     if (!history || !history.rates) return [];
@@ -364,62 +566,65 @@
     return { text: `Roughly in the middle of its ${rangeLabel} range.`, cls: 'neutral' };
   }
 
-  function renderTrends(history, rangeKey) {
+  function renderTrend(history, rangeKey, cur) {
     const container = document.getElementById('trends-container');
-    container.innerHTML = '';
     container.classList.remove('fade-in');
-    // eslint-disable-next-line no-unused-expressions
     void container.offsetWidth; // restart the animation on every render
     container.classList.add('fade-in');
+
     const rangeLabel = RANGE_OPTIONS[rangeKey].longLabel;
+    const series = buildSeries(history, cur);
 
-    CURRENCIES.forEach((cur) => {
-      const series = buildSeries(history, cur);
-      const block = document.createElement('div');
-      block.className = 'trend-block';
+    if (series.length === 0) {
+      container.innerHTML = '<p class="meta">No historical data available for this currency.</p>';
+      return;
+    }
 
-      if (series.length === 0) {
-        block.innerHTML = `<div class="trend-title">SGD → ${cur}</div><p class="meta">No historical data available.</p>`;
-        container.appendChild(block);
-        return;
-      }
+    const values = series.map((p) => p.value);
+    const current = values[values.length - 1];
+    const callout = trendCallout(series, rangeLabel);
 
-      const values = series.map((p) => p.value);
-      const current = values[values.length - 1];
-      const callout = trendCallout(series, rangeLabel);
-
-      block.innerHTML = `
-        <div class="trend-title">${CURRENCY_META[cur].flag} SGD → ${cur}</div>
-        <div class="trend-chart-wrap">${renderChartSvg(series)}</div>
-        <div class="trend-callout ${callout.cls}">${callout.text}</div>
-        <div class="trend-range">1 SGD = ${current.toFixed(3)} ${cur} now</div>
-      `;
-      container.appendChild(block);
-    });
+    container.innerHTML = `
+      <div class="trend-chart-wrap">${renderChartSvg(series)}</div>
+      <div class="trend-callout ${callout.cls}">${callout.text}</div>
+      <div class="trend-range">1 SGD = ${current.toFixed(3)} ${cur} now</div>
+    `;
   }
 
   function renderTrendsError() {
-    const container = document.getElementById('trends-container');
-    container.innerHTML = '<p class="meta">Could not load trend history — check your connection and reload.</p>';
+    document.getElementById('trends-container').innerHTML = '<p class="meta">Could not load trend history — check your connection and reload.</p>';
   }
 
   function renderTrendsLoading() {
-    const container = document.getElementById('trends-container');
-    container.innerHTML = '<p class="meta">Loading charts…</p>';
+    document.getElementById('trends-container').innerHTML = '<p class="meta">Loading chart…</p>';
   }
 
-  async function loadAndRenderTrends(rangeKey) {
+  function renderChartCurrencySelect() {
+    const select = document.getElementById('chart-currency-select');
+    select.innerHTML = ALL_CURRENCIES.map((cur) =>
+      `<option value="${cur}" ${cur === state.chartCurrency ? 'selected' : ''}>${cur} — ${CURRENCY_META[cur].name}</option>`
+    ).join('');
+    select.addEventListener('change', () => {
+      state.chartCurrency = select.value;
+      saveChartCurrency(state.chartCurrency);
+      if (state.history) renderTrend(state.history, state.rangeKey, state.chartCurrency);
+      if (state.latest) renderQuickRef(state.latest, state.chartCurrency);
+    });
+  }
+
+  async function loadAndRenderHistory(rangeKey) {
+    state.rangeKey = rangeKey;
     document.querySelectorAll('.range-btn').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.range === rangeKey);
     });
-    try {
-      localStorage.setItem('ct_trend_range', rangeKey);
-    } catch (e) { /* ignore */ }
+    saveRange(rangeKey);
 
     renderTrendsLoading();
     try {
       const history = await getHistory(rangeKey);
-      renderTrends(history, rangeKey);
+      state.history = history;
+      renderTrend(history, rangeKey, state.chartCurrency);
+      loadOverviewBadges();
     } catch (e) {
       renderTrendsError();
     }
@@ -427,7 +632,7 @@
 
   function initRangeSelector() {
     document.querySelectorAll('.range-btn').forEach((btn) => {
-      btn.addEventListener('click', () => loadAndRenderTrends(btn.dataset.range));
+      btn.addEventListener('click', () => loadAndRenderHistory(btn.dataset.range));
     });
   }
 
@@ -435,6 +640,12 @@
 
   async function init() {
     initRangeSelector();
+    renderOverviewChips();
+    renderChartCurrencySelect();
+
+    document.querySelectorAll('.range-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.range === state.rangeKey);
+    });
 
     // Overview + quick reference
     try {
@@ -442,29 +653,23 @@
       const isFresh = cachedEntry && (Date.now() - cachedEntry.ts <= LATEST_TTL_MS);
       const latest = await getLatestRates();
       renderOverview(latest, isFresh ? cachedEntry.ts : null);
-      renderQuickRef(latest);
+      renderQuickRef(latest, state.chartCurrency);
       clearGlobalError();
     } catch (e) {
       const cachedEntry = cacheGet('ct_cache_latest');
       if (cachedEntry) {
         renderOverview(cachedEntry.data, cachedEntry.ts);
-        renderQuickRef(cachedEntry.data);
+        renderQuickRef(cachedEntry.data, state.chartCurrency);
         showGlobalError('Live rates unavailable right now — showing the last cached rates.');
       } else {
         renderOverviewError();
-        renderQuickRef(null);
+        renderQuickRef(null, state.chartCurrency);
         showGlobalError('Unable to reach the exchange rate service. Check your connection and reload the page.');
       }
     }
-    loadOverviewBadges();
 
     // Trend history
-    let savedRange = DEFAULT_RANGE;
-    try {
-      const stored = localStorage.getItem('ct_trend_range');
-      if (stored && RANGE_OPTIONS[stored]) savedRange = stored;
-    } catch (e) { /* ignore */ }
-    await loadAndRenderTrends(savedRange);
+    await loadAndRenderHistory(state.rangeKey);
   }
 
   document.addEventListener('DOMContentLoaded', init);

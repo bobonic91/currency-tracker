@@ -11,7 +11,7 @@
 
   <header class="app-header">
     <h1>SGD Currency Tracker</h1>
-    <p class="subtitle">SGD vs JPY · CNY · MYR</p>
+    <p class="subtitle">Pick the currencies you care about</p>
   </header>
 
   <div class="disclaimer" role="note">
@@ -25,42 +25,30 @@
     <h2>Current Mid-Market Rates</h2>
     <p class="meta" id="overview-updated">Loading…</p>
     <p class="meta">ECB publishes reference rates once per weekday (~4pm CET) — outside those hours, or on weekends/holidays, this is the most recent published rate.</p>
+    <div class="chip-row" id="overview-chips" role="group" aria-label="Currencies to show"></div>
     <div class="rate-grid" id="overview-grid">
-      <div class="rate-card skeleton" data-currency="JPY">
-        <span class="flag">🇯🇵</span>
-        <span class="pair">SGD → JPY</span>
-        <span class="rate-value">—</span>
-      </div>
-      <div class="rate-card skeleton" data-currency="CNY">
-        <span class="flag">🇨🇳</span>
-        <span class="pair">SGD → CNY</span>
-        <span class="rate-value">—</span>
-      </div>
-      <div class="rate-card skeleton" data-currency="MYR">
-        <span class="flag">🇲🇾</span>
-        <span class="pair">SGD → MYR</span>
-        <span class="rate-value">—</span>
-      </div>
+      <p class="meta">Loading…</p>
     </div>
   </section>
 
   <!-- Trends -->
   <section class="card" id="trends-section">
     <h2>Trend</h2>
+    <select id="chart-currency-select" aria-label="Currency to chart"></select>
     <div class="range-selector" role="group" aria-label="Trend range">
       <button type="button" class="range-btn" data-range="1M">1M</button>
       <button type="button" class="range-btn active" data-range="6M">6M</button>
       <button type="button" class="range-btn" data-range="1Y">1Y</button>
     </div>
     <div id="trends-container">
-      <p class="meta">Loading charts…</p>
+      <p class="meta">Loading chart…</p>
     </div>
   </section>
 
   <!-- Quick reference -->
   <section class="card" id="quickref-section">
     <h2>Quick Reference</h2>
-    <p class="meta">Common SGD amounts converted at the current mid-market rate.</p>
+    <p class="meta">Common SGD amounts converted at the current mid-market rate, for the currency selected above.</p>
     <div id="quickref-container">
       <p class="meta">Loading…</p>
     </div>
